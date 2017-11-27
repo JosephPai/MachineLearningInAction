@@ -4,11 +4,12 @@ from os import listdir
 
 def classify0(inX, dataSet, labels, k):
     dataSetSize = dataSet.shape[0]
+    ####计算欧式距离
     diffMat = tile(inX, (dataSetSize,1)) - dataSet
     sqDiffMat = diffMat**2
-    sqDistances = sqDiffMat.sum(axis=1)
+    sqDistances = sqDiffMat.sum(axis=1) ###行向量分别相加，从而得到新的一个行向量
     distances = sqDistances**0.5
-    sortedDistIndicies = distances.argsort()
+    sortedDistIndicies = distances.argsort() ##argsort()根据元素的值从小到大对元素进行排序，返回下标，下标索引！！
     classCount={}
     for i in range(k):
         voteIlabel = labels[sortedDistIndicies[i]]
@@ -16,6 +17,7 @@ def classify0(inX, dataSet, labels, k):
     sortedClassCount = sorted(classCount.items(), key=operator.itemgetter(1), reverse=True)
     return sortedClassCount[0][0]
 
+## 给出训练数据以及对应的类别
 def createDataSet():
     group = array([[1.0,1.1],[1.0,1.0],[0,0],[0,0.1]])
     labels = ['A','A','B','B']
@@ -23,19 +25,20 @@ def createDataSet():
 
 def file2matrix(filename):
     fr = open(filename)
-    arrayOLines = fr.readlines()
+    arrayOLines = fr.readlines()    ###读取文件的所有内容
     numberOLines = len(arrayOLines)
     returnMat = zeros((numberOLines,3))
     classLabelVector = []
     index = 0
     for line in arrayOLines:
-        line = line.strip()
-        listFromLine = line.split('\t')
+        line = line.strip() ###截取所有的回车字符
+        listFromLine = line.split('\t') ###用tab制表符分割
         returnMat[index,:] = listFromLine[0:3]
-        classLabelVector.append(int(listFromLine[-1]))
+        classLabelVector.append(int(listFromLine[-1]))  ###将列表的最后一列存储到向量classLabelVector中
         index += 1
     return returnMat, classLabelVector
 
+## 归一化数据,保证特征等权重
 def autoNorm(dataSet):
     minVals = dataSet.min(0)
     maxVals = dataSet.max(0)
