@@ -10,7 +10,7 @@ def loadDataSet():
     return dataMat, labelMat
 
 def sigmoid(inX):
-    return 1.0/(1+exp(-inX))
+    return longfloat(1.0/(1+exp(-inX))) # 使用longfloat防止溢出
 
 # 梯度上升
 def gradAscent(dataMatIn, classLabels):
@@ -74,3 +74,40 @@ def plotBestFit(wei):
     ax.plot(x,y)
     plt.xlabel('X1');   plt.ylabel('X2')
     plt.show()
+
+def classifyVector(inX, weights):
+    prob = sigmoid(sum(inX*weights))
+    if prob>0.5:    return 1.0
+    else:   return 0.0
+
+def colicTest():
+    frTrain = open('horseColicTraining.txt')
+    frTest = open('horseColicTest.txt')
+    trainingSet = [];   trainLabels = []
+    for line in frTrain.readlines():
+        currLine = line.strip().split('\t')
+        lineArr=[]
+        for i in range(21):
+            lineArr.append(float(currLine[i]))
+        trainingSet.append(lineArr)
+        trainLabels.append(float(currLine[21]))
+    trainWeights = stocGradAscent1(array(trainingSet), trainLabels, 500)
+    errorCount = 0; numTestVec=0.0
+    for line in frTest.readlines():
+        numTestVec += 1.0
+        currLine=line.strip().split('\t')
+        lineArr=[]
+        for i in range(21):
+            lineArr.append(float(currLine[i]))
+        if int(classifyVector(array(lineArr),trainWeights)!=int(currLine[21])):
+            errorCount+=1
+    errorRate = (float(errorCount)/numTestVec)
+    print("The error rate of this test is:%f" % errorRate)
+    return errorRate
+
+def multiTest():
+    numTests=10;    errorSum=0.0
+    for k in range(numTests):
+        errorSum += colicTest()
+    print("After %d iteration the average error rate is: %f" % \
+          (numTests, errorSum/float(numTests)))
